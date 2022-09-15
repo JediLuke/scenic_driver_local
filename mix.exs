@@ -2,7 +2,7 @@ defmodule Scenic.Driver.Local.MixProject do
   use Mix.Project
 
   @app_name :scenic_driver_local
-  @version "0.11.0-beta.0"
+  @version "0.11.0"
   @github "https://github.com/ScenicFramework/scenic_driver_local"
 
   def project do
@@ -48,11 +48,12 @@ defmodule Scenic.Driver.Local.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:input_event, "~> 0.4"},
-      {:scenic, "~> 0.11.0-beta.0"},
+      {:input_event, "~> 1.0 or ~> 0.4"},
+      {:scenic, "~> 0.11.0"},
       {:elixir_make, "~> 0.6", runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.1", only: :dev, runtime: false}
+      {:dialyxir, "~> 1.1", only: :dev, runtime: false},
+      {:telemetry, "~> 1.1"}
     ]
   end
 
@@ -92,7 +93,7 @@ defmodule Scenic.Driver.Local.MixProject do
       name: @app_name,
       contributors: ["Boyd Multerer"],
       maintainers: ["Boyd Multerer"],
-      licenses: ["Apache 2"],
+      licenses: ["Apache-2.0"],
       links: %{Github: @github},
       files: [
         "Makefile",
