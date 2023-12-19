@@ -14,12 +14,6 @@
 
 #include <stdint.h>
 
-
-#ifndef NANOVG_H
-#include "nanovg/nanovg.h"
-#endif
-
-
 #ifndef PACK
   #ifdef _MSC_VER
     #define PACK( __Declaration__ ) \
@@ -28,8 +22,6 @@
     #define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
   #endif
 #endif
-
-typedef unsigned char byte;
 
 //---------------------------------------------------------
 PACK(typedef struct Vector2f
@@ -42,18 +34,19 @@ PACK(typedef struct Vector2f
 //---------------------------------------------------------
 // the data pointed to by the window private data pointer
 typedef struct {
-  bool              keep_going;
-  uint32_t          input_flags;
-  float             last_x;
-  float             last_y;
-  int               root_script;
-  void*             p_tx_ids;
-  void*             p_fonts;
-  NVGcontext*       p_ctx;
-  float           global_tx[6];
-  float           cursor_tx[6];
-  float           cursor_pos[2];
-  uint32_t          f_show_cursor;
+  bool keep_going;
+  uint32_t input_flags;
+  float last_x;
+  float last_y;
+  int root_script;
+  void* p_tx_ids;
+  void* p_fonts;
+  void* v_ctx;
+  float global_tx[6];
+  float cursor_tx[6];
+  float cursor_pos[2];
+  uint32_t f_show_cursor;
+  int debug_mode;
 } driver_data_t;
 
 
@@ -62,7 +55,7 @@ typedef struct {
   int width;
   int height;
   float ratio;
-  NVGcontext* p_ctx;
+  void* v_ctx;
 } device_info_t;
 
 typedef struct {

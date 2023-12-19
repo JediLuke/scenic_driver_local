@@ -5,7 +5,7 @@
 // from erl_comm.c
 // http://erlang.org/doc/tutorial/c_port.html#id64377
 //---------------------------------------------------------
-int read_exact(byte* buf, int len)
+int read_exact(uint8_t* buf, int len)
 {
   int i, got = 0;
 
@@ -20,15 +20,15 @@ int read_exact(byte* buf, int len)
 }
 
 //---------------------------------------------------------
-int write_exact(byte* buf, int len)
+int write_exact(uint8_t* buf, int len)
 {
   int i, wrote = 0;
 
   do
   {
-      if ((i = write(1, buf + wrote, len - wrote)) <= 0)
+    if ((i = write(1, buf + wrote, len - wrote)) <= 0)
       return (i);
-      wrote += i;
+    wrote += i;
   } while (wrote < len);
 
   return (len);
@@ -43,7 +43,7 @@ int write_exact(byte* buf, int len)
 // frame rate
 int read_msg_length(struct timeval * ptv)
 {
-  byte buff[4];
+  uint8_t buff[4];
 
   fd_set rfds;
   int    retval;

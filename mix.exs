@@ -50,7 +50,10 @@ defmodule Scenic.Driver.Local.MixProject do
     [
       {:input_event, "~> 1.0 or ~> 0.4"},
       {:scenic, "~> 0.11.0"},
-      {:elixir_make, "~> 0.6", runtime: false},
+
+      # Tools
+      {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:elixir_make, "~> 0.6 or ~> 0.7", runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, "~> 1.1", only: :dev, runtime: false},
       {:telemetry, "~> 1.1"}
@@ -91,7 +94,7 @@ defmodule Scenic.Driver.Local.MixProject do
   defp package do
     [
       name: @app_name,
-      contributors: ["Boyd Multerer"],
+      contributors: ["Boyd Multerer", "Jon Ringle"],
       maintainers: ["Boyd Multerer"],
       licenses: ["Apache-2.0"],
       links: %{Github: @github},

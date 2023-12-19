@@ -25,6 +25,7 @@ defmodule Scenic.Driver.Local do
     layer: [type: :integer, default: @default_layer],
     opacity: [type: :integer, default: @default_opacity],
     debug: [type: :boolean, default: false],
+    debugger: [type: :string, default: ""],
     antialias: [type: :boolean, default: true],
     calibration: [
       type: {:custom, __MODULE__, :validate_calibration, []},
@@ -39,7 +40,8 @@ defmodule Scenic.Driver.Local do
       type:
         {:or, [:mfa, {:in, [:restart, :stop_driver, :stop_viewport, :stop_system, :halt_system]}]},
       default: :restart
-    ]
+    ],
+    input_blacklist: [type: {:list, :string}, default: []]
   ]
 
   # @mix_target Mix.Tasks.Compile.ScenicDriverLocal.target()
@@ -58,7 +60,7 @@ defmodule Scenic.Driver.Local do
 
   alias Scenic.Driver
 
-  alias Scenic.Driver.Local.Calbacks
+  alias Scenic.Driver.Local.Callbacks
   alias Scenic.Driver.Local.Input
   alias Scenic.Driver.Local.ToPort
   alias Scenic.Driver.Local.FromPort
@@ -211,6 +213,7 @@ defmodule Scenic.Driver.Local do
         false -> 0
       end
 
+    {:ok, debugger} = Keyword.fetch(opts, :debugger)
     {:ok, layer} = Keyword.fetch(opts, :layer)
     {:ok, opacity} = Keyword.fetch(opts, :opacity)
 
@@ -230,7 +233,9 @@ defmodule Scenic.Driver.Local do
     # open and initialize the window
     Process.flag(:trap_exit, true)
 
-    executable = :code.priv_dir(:scenic_driver_local) ++ @port ++ to_charlist(args)
+    executable =
+      to_charlist(debugger) ++
+        ' ' ++ :code.priv_dir(:scenic_driver_local) ++ @port ++ to_charlist(args)
 
     port = Port.open({:spawn, executable}, [:binary, {:packet, 4}])
 
@@ -262,7 +267,8 @@ defmodule Scenic.Driver.Local do
         cursor_update: false,
         rel_x: 0,
         rel_y: 0,
-        dirty_streams: []
+        dirty_streams: [],
+        input_blacklist: opts[:input_blacklist]
       )
 
     # send message to set up the cursor later
@@ -285,19 +291,19 @@ defmodule Scenic.Driver.Local do
 
   @doc false
   @impl Scenic.Driver
-  defdelegate reset_scene(driver), to: Calbacks
+  defdelegate reset_scene(driver), to: Callbacks
 
   @doc false
   @impl Scenic.Driver
-  defdelegate update_scene(ids, driver), to: Calbacks
+  defdelegate update_scene(ids, driver), to: Callbacks
 
   @doc false
   @impl Scenic.Driver
-  defdelegate del_scripts(ids, driver), to: Calbacks
+  defdelegate del_scripts(ids, driver), to: Callbacks
 
   @doc false
   @impl Scenic.Driver
-  defdelegate clear_color(color, driver), to: Calbacks
+  defdelegate clear_color(color, driver), to: Callbacks
 
   # --------------------------------------------------------
 
