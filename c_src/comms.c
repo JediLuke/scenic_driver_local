@@ -65,6 +65,7 @@ The caller will typically be erlang, so use the 2-byte length indicator
 
 #define CMD_PUT_FONT 0x40
 #define CMD_PUT_IMG 0x41
+#define CMD_SCREENSHOT 0x50
 
 
 // #define CMD_QUERY_STATS 0x21
@@ -713,6 +714,10 @@ void dispatch_message( int msg_length, driver_data_t* p_data )
       put_image( &msg_length, p_data->p_ctx );
       break;
 
+    case CMD_SCREENSHOT:
+      take_screenshot( &msg_length, p_data );
+      break;
+
     case CMD_CRASH:
       receive_crash();
       break;
@@ -776,5 +781,84 @@ void handle_stdio_in(driver_data_t* p_data)
   }
 
   return;
+}
+
+//=============================================================================
+// Screenshot functionality
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "nanovg/stb_image_write.h"
+
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
+
+void take_screenshot(int* p_msg_length, driver_data_t* p_data)
+{
+  uint32_t path_len;
+  char* path;
+  
+  // Read the file path length
+  read_bytes_down(&path_len, sizeof(uint32_t), p_msg_length);
+  
+  // Allocate and read the path
+  path = malloc(path_len + 1);
+  read_bytes_down(path, path_len, p_msg_length);
+  path[path_len] = '\0'; // Null terminate
+  
+  // Don't force render - just capture current framebuffer
+  // The screenshot should capture what's currently displayed
+  
+  // Get actual framebuffer dimensions using OpenGL viewport
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  int width = viewport[2];
+  int height = viewport[3];
+  
+  log_info("Screenshot dimensions:");
+  put_sn("Window width:", g_device_info.width);
+  put_sn("Window height:", g_device_info.height);
+  put_sn("Viewport width:", width);
+  put_sn("Viewport height:", height);
+  
+  // Ensure proper pixel alignment
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  
+  // Allocate buffer for pixel data (RGBA format - OpenGL prefers 4-byte alignment)
+  unsigned char* pixels = malloc(width * height * 4);
+  
+  // Read pixels from front buffer (what's currently displayed)
+  glReadBuffer(GL_FRONT);
+  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  
+  // Flip image vertically and convert RGBA to RGB
+  unsigned char* flipped = malloc(width * height * 3);
+  for(int y = 0; y < height; y++) {
+    for(int x = 0; x < width; x++) {
+      int src_idx = ((height - 1 - y) * width + x) * 4;  // RGBA source
+      int dst_idx = (y * width + x) * 3;                 // RGB destination
+      flipped[dst_idx + 0] = pixels[src_idx + 0];  // R
+      flipped[dst_idx + 1] = pixels[src_idx + 1];  // G
+      flipped[dst_idx + 2] = pixels[src_idx + 2];  // B
+      // Skip alpha channel
+    }
+  }
+  
+  // Write PNG file
+  int result = stbi_write_png(path, width, height, 3, flipped, width * 3);
+  
+  // Cleanup
+  free(pixels);
+  free(flipped);
+  free(path);
+  
+  // Log result
+  if(result) {
+    log_info("Screenshot saved successfully");
+  } else {
+    log_error("Failed to save screenshot");
+  }
 }
 

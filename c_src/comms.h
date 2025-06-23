@@ -100,5 +100,7 @@ void handle_stdio_in(driver_data_t* p_data);
 // void* comms_thread(void* window);
 // bool handle_stdio_in( driver_data_t* p_data )
 
+// screenshot functionality
+void take_screenshot(int* p_msg_length, driver_data_t* p_data);
 
 uint64_t get_time_stamp();
