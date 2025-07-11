@@ -67,7 +67,7 @@ defmodule Scenic.Driver.Local do
   alias Scenic.Math.Matrix
   alias Scenic.Math.Vector2
 
-  @port '/scenic_driver_local'
+  @port ~c"/scenic_driver_local"
 
   # @root_id Scenic.ViewPort.root_id()
 
@@ -145,7 +145,7 @@ defmodule Scenic.Driver.Local do
   end
 
   # not ready to expose these yet. I want to think through the cursor model better
-  # it will probably end up as a :cursor style that you can place on items. Then the 
+  # it will probably end up as a :cursor style that you can place on items. Then the
   # cursor type would change as it moves over those items.
 
   # the reason I'm not exposing this now is that it would require the :cursor_pos
