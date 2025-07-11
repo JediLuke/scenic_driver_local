@@ -142,7 +142,7 @@ defmodule Scenic.Driver.Local.FromPort do
         driver
       ) do
     IO.inspect(msg, label: "scenic_driver_local warn")
-    Logger.warn("scenic_driver_local: #{inspect(msg)}")
+    Logger.warning("scenic_driver_local: #{inspect(msg)}")
     {:noreply, driver}
   end
 
