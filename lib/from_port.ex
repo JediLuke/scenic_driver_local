@@ -67,6 +67,7 @@ defmodule Scenic.Driver.Local.FromPort do
         >>,
         driver
       ) do
+    :telemetry.execute([:render, :finish], %{timestamp: :erlang.system_time()})
     {:noreply, set_busy(driver, false)}
   end
 
@@ -127,7 +128,7 @@ defmodule Scenic.Driver.Local.FromPort do
         <<@msg_puts_id::unsigned-integer-size(32)-native>> <> msg,
         driver
       ) do
-    Logger.info("scenic_driver_local puts: #{inspect(msg)}")
+    # Logger.info("scenic_driver_local puts: #{inspect(msg)}")
     {:noreply, driver}
   end
 
@@ -136,7 +137,7 @@ defmodule Scenic.Driver.Local.FromPort do
         <<@msg_info_id::unsigned-integer-size(32)-native>> <> msg,
         driver
       ) do
-    Logger.info("scenic_driver_local: #{msg}")
+    # Logger.info("scenic_driver_local: #{msg}")
     {:noreply, driver}
   end
 
@@ -145,7 +146,7 @@ defmodule Scenic.Driver.Local.FromPort do
         <<@msg_warn_id::unsigned-integer-size(32)-native>> <> msg,
         driver
       ) do
-    Logger.warning("scenic_driver_local: #{msg}")
+    # Logger.warning("scenic_driver_local: #{msg}")
     {:noreply, driver}
   end
 
@@ -154,7 +155,7 @@ defmodule Scenic.Driver.Local.FromPort do
         <<@msg_error_id::unsigned-integer-size(32)-native>> <> msg,
         driver
       ) do
-    Logger.error("scenic_driver_local: #{msg}")
+    # Logger.error("scenic_driver_local: #{msg}")
     {:noreply, driver}
   end
 
@@ -163,7 +164,7 @@ defmodule Scenic.Driver.Local.FromPort do
         <<@msg_debug_id::unsigned-integer-size(32)-native>> <> msg,
         driver
       ) do
-    Logger.debug("scenic_driver_local: #{msg}")
+    # Logger.debug("scenic_driver_local: #{msg}")
     {:noreply, driver}
   end
 
@@ -183,7 +184,7 @@ defmodule Scenic.Driver.Local.FromPort do
       ) do
     # credo:disable-for-next-line Credo.Check.Warning.IoInspect
     IO.inspect(msg)
-    Logger.info("scenic_driver_local inspect: #{inspect(msg)}")
+    # Logger.info("scenic_driver_local inspect: #{inspect(msg)}")
     {:noreply, driver}
   end
 
@@ -363,7 +364,7 @@ defmodule Scenic.Driver.Local.FromPort do
 
   # --------------------------------------------------------
 
-  # key codes use the standards defined by gdk, which generates them with 
+  # key codes use the standards defined by gdk, which generates them with
   # https://gitlab.gnome.org/GNOME/gtk/-/blob/gtk-3-24/gdk/gdkkeysyms-update.pl
   # which sources it's values from
   # https://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h

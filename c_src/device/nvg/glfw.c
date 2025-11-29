@@ -240,6 +240,10 @@ NVGcontext* setup_window(GLFWwindow* window, const device_opts_t* p_opts)
   // set the initial clear color
   glClearColor(0.0, 0.0, 0.0, 1.0);
 
+  // Disable vsync to reduce input latency
+  // (vsync can cause up to 16ms+ delays per frame)
+  glfwSwapInterval(0);
+
   // return the nvg context
   return p_ctx;
 }
