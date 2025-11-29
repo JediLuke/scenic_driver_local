@@ -106,6 +106,27 @@ void script_ops_draw_rrect(void* v_ctx,
   if (stroke) nvgStroke(p_ctx);
 }
 
+void script_ops_draw_rrectv(void* v_ctx,
+                           float w,
+                           float h,
+                           float ulr,
+                           float urr,
+                           float lrr,
+                           float llr,
+                           bool fill, bool stroke)
+{
+  if (g_opts.debug_mode) {
+    log_script_ops_draw_rrectv(log_prefix, __func__, log_level_info,
+                               w, h, ulr, urr, lrr, llr, fill, stroke);
+  }
+
+  NVGcontext* p_ctx = (NVGcontext*)v_ctx;
+  nvgBeginPath(p_ctx);
+  nvgRoundedRectVarying(p_ctx, 0, 0, w, h, ulr, urr, lrr, llr);
+  if (fill) nvgFill(p_ctx);
+  if (stroke) nvgStroke(p_ctx);
+}
+
 void script_ops_draw_arc(void* v_ctx,
                          float radius,
                          float radians,
@@ -224,7 +245,7 @@ void script_ops_draw_text(void* v_ctx,
 // see: https://github.com/memononen/nanovg/issues/348
 static void draw_image(NVGcontext* p_ctx,
                        sid_t id,
-                       const sprite_t s)
+                       const sprite_t sprite)
 {
   float ax, ay;
   NVGpaint img_pattern;
@@ -237,20 +258,20 @@ static void draw_image(NVGcontext* p_ctx,
   int iw,ih;
   nvgImageSize(p_ctx, p_image->image_id, &iw, &ih);
 
-  // Aspect ration of pixel in x an y dimensions. This allows us to scale
+  // Aspect ratio of pixel in x and y dimensions. This allows us to scale
   // the sprite to fill the whole rectangle.
-  ax = s.dw / s.sw;
-  ay = s.dh / s.sh;
+  ax = sprite.dw / sprite.sw;
+  ay = sprite.dh / sprite.sh;
 
   // create the temporary pattern
   img_pattern = nvgImagePattern(p_ctx,
-                                s.dx - s.sx*ax, s.dy - s.sy*ay,
+                                sprite.dx - sprite.sx*ax, sprite.dy - sprite.sy*ay,
                                 (float)iw*ax, (float)ih*ay,
-                                0, p_image->image_id, 1.0);
+                                0, p_image->image_id, sprite.alpha);
 
   // draw the image into a rect
   nvgBeginPath(p_ctx);
-  nvgRect(p_ctx, s.dx, s.dy, s.dw, s.dh);
+  nvgRect(p_ctx, sprite.dx, sprite.dy, sprite.dw, sprite.dh);
   nvgFillPaint(p_ctx, img_pattern);
   nvgFill(p_ctx);
 

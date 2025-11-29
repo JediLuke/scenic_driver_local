@@ -26,6 +26,7 @@ defmodule Scenic.Driver.Local do
     opacity: [type: :integer, default: @default_opacity],
     debug: [type: :boolean, default: false],
     debugger: [type: :string, default: ""],
+    debug_fps: [type: :integer, default: 0],
     antialias: [type: :boolean, default: true],
     calibration: [
       type: {:custom, __MODULE__, :validate_calibration, []},
@@ -69,7 +70,7 @@ defmodule Scenic.Driver.Local do
   alias Scenic.Math.Matrix
   alias Scenic.Math.Vector2
 
-  @port '/scenic_driver_local'
+  @port ~c"/scenic_driver_local"
 
   # @root_id Scenic.ViewPort.root_id()
 
@@ -147,7 +148,7 @@ defmodule Scenic.Driver.Local do
   end
 
   # not ready to expose these yet. I want to think through the cursor model better
-  # it will probably end up as a :cursor style that you can place on items. Then the 
+  # it will probably end up as a :cursor style that you can place on items. Then the
   # cursor type would change as it moves over those items.
 
   # the reason I'm not exposing this now is that it would require the :cursor_pos
@@ -214,11 +215,13 @@ defmodule Scenic.Driver.Local do
       end
 
     {:ok, debugger} = Keyword.fetch(opts, :debugger)
+    {:ok, debug_fps} = Keyword.fetch(opts, :debug_fps)
     {:ok, layer} = Keyword.fetch(opts, :layer)
     {:ok, opacity} = Keyword.fetch(opts, :opacity)
 
     {:ok, window_opts} = Keyword.fetch(opts, :window)
     {:ok, title} = Keyword.fetch(window_opts, :title)
+    fbdev = Keyword.get(window_opts, :fbdev, "/dev/fb0")
 
     resizeable =
       case window_opts[:resizeable] do
@@ -227,15 +230,15 @@ defmodule Scenic.Driver.Local do
       end
 
     args =
-      " #{internal_cursor} #{layer} #{opacity} #{antialias} #{debug_mode}" <>
-        " #{width} #{height} #{resizeable} \"#{title}\""
+      " #{internal_cursor} #{layer} #{opacity} #{antialias} #{debug_mode} #{debug_fps}" <>
+        " #{width} #{height} #{resizeable} #{fbdev} \"#{title}\""
 
     # open and initialize the window
     Process.flag(:trap_exit, true)
 
     executable =
       to_charlist(debugger) ++
-        ' ' ++ :code.priv_dir(:scenic_driver_local) ++ @port ++ to_charlist(args)
+        ~c" " ++ :code.priv_dir(:scenic_driver_local) ++ @port ++ to_charlist(args)
 
     port = Port.open({:spawn, executable}, [:binary, {:packet, 4}])
 

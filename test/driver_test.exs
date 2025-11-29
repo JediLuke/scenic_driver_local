@@ -9,6 +9,7 @@ defmodule Scenic.Driver.LocalTest do
       opacity: 1,
       debug: false,
       debugger: "",
+      debug_fps: 0,
       antialias: true,
       calibration: [{"calibration_name", {{0, 0, 0}, {0, 0, 0}}}],
       position: [
@@ -30,7 +31,7 @@ defmodule Scenic.Driver.LocalTest do
   end
 
   test "validate_opts/1 with invalid opts" do
-    assert {:error, validation_error} = Scenic.Driver.Local.validate_opts(name: 'Bob')
+    assert {:error, validation_error} = Scenic.Driver.Local.validate_opts(name: ~c"Bob")
 
     assert validation_error.message =~ "expected :name"
   end

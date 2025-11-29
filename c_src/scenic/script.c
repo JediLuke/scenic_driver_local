@@ -255,6 +255,18 @@ void render_script(void* v_ctx, sid_t id)
         }
         i += 12;
         break;
+      case SCRIPT_OP_DRAW_RRECTV:
+        {
+          float w = get_float(p, i);
+          float h = get_float(p, i + 4);
+          float ulr = get_float(p, i + 8);
+          float urr = get_float(p, i + 12);
+          float lrr = get_float(p, i + 16);
+          float llr = get_float(p, i + 20);
+          script_ops_draw_rrectv(v_ctx, w, h, ulr, urr, lrr, llr, (param & FLAG_FILL), (param & FLAG_STROKE));
+        }
+        i += 24;
+        break;
       case SCRIPT_OP_DRAW_ARC:
         {
           float radius = get_float(p, i);
@@ -317,10 +329,11 @@ void render_script(void* v_ctx, sid_t id)
               .dx = get_float(p, i + 16),
               .dy = get_float(p, i + 20),
               .dw = get_float(p, i + 24),
-              .dh = get_float(p, i + 28)
+              .dh = get_float(p, i + 28),
+              .alpha = get_float( p, i + 32 )
             };
 
-            i += 32;
+            i += 36;
           }
           script_ops_draw_sprites(v_ctx, id, count, sprites);
           free(sprites);
