@@ -9,13 +9,13 @@ This driver replaces both `:scenic_driver_glfw` and `:scenic_driver_nerves_rpi` 
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `scenic_driver_local` to your list of dependencies in `mix.exs`:
+scenic_driver_local can be installed by adding `scenic_driver_local` to your
+list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:scenic_driver_local, "~> 0.11.0"}
+    {:scenic_driver_local, "~> 0.12.0"}
   ]
 end
 ```
@@ -35,31 +35,24 @@ Example:
 
 There are quite a few new options as well. It uses `NimbleOptions` to confirm them, so look at the `Scenic.Driver.Local` module for details.
 
-## Targets
+## Targets (Nerves)
 
-This driver does it's best to figure out what underlying graphics technology to use depending on whhat your MIX_TARGET is set to.
+This driver figures out what underlying graphics technology to use depending on what your `MIX_TARGET` environment variable is set to.
 
-For example, for apps running on a Mac/PC/Linux, it is usually set to `host`, which causes the driver to use `glfw` as the underlying tech.
+For example, for apps running on a Mac/PC/Linux, it is usually set to `host`, which causes the driver to use `cairo-gtk` as the underlying tech.
 
-If you are building for Nerves, it will use `bcm` (Broadcom Manager) for any of `rpi`, `rpi0`, `rip2`, `rpi3`, and `rpi3a`.
+If you are building for Nerves, it will use `cairo-fb`
 
-### Nerves rpi4 & bbb Need Work / Help
-`Scenic.Driver.Local` uses `drm` (Direct Render Manager) for the `rpi4` and `bbb`. It currently renders on the rpi4, but is __very slow__. I haven't figured out why yet and if anyone wants to dig in, that would be appreciated. It should be really fast, so is probably a hardware configuration issue.
 
-The `bbb` doesn't work (is close in theory??) as the Nerves `bbb` system doesn't have the needed graphics support in it yet. There are others who have gotten SGX support working for the `bbb` and I could use some help from them.
+Previous versions of `scenic_driver_local` would use `bcm` (Broadcom Manager) for any of `rpi`, `rpi0`, `rip2`, `rpi3`, and `rpi3a` and `drm` for `bbb` and `rpi4`.
 
-### Custom Nerves Targets
-For custom systems (example - figuring out how to add SGX support to the `bbb`) You will need to set SCENIC_LOCAL_TARGET manually. You may also need to set the SCENIC_LOCAL_GL as well.
+You can explicitly use these by setting `SCENIC_LOCAL_TARGET=bcm` or `SCENIC_LOCAL_TARGET=drm`, **but these options are being deprecated**.
+Please try the default of `SCENIC_LOCAL_TARGET=cairo-fb` as this should work universally on any Nerves target.
 
-example in your command line
-
-```
-export SCENIC_LOCAL_TARGET=drm
-export SCENIC_LOCAL_GL=gles3
-```
-
-These options may change, especially as we sort out the issues on the `rpi4` and the `bbb`. If SCENIC_LOCAL_TARGET isn't set, then look in the build output for instructions.
-
+`cairo-fb` will require that your `nerves_system_*` has the `cairo` library
+selected via the `BR2_PACKAGE_CAIRO=y` buildroot configuration. If you're using
+one of the official nerves systems then `BR2_PACKAGE_CAIRO=y` is configured by
+default if you're using 1.25.0 or greater.
 
 ## Prerequisites
 
@@ -67,34 +60,24 @@ This driver requires Scenic v0.11 or up.
 
 ### Installing on MacOS
 
-The easiest way to install on MacOS is to use Homebrew. Just run the following in a terminal:
+You will need to install [XQuartz](https://www.xquartz.org/) on macOS.
+
+The easiest way to install needed build time dependencies on MacOS is to use Homebrew. Just run the following in a terminal:
 
 ```bash
 brew update
-brew install glfw3 glew pkg-config
+brew install gtk+3 cairo pkg-config
 ```
-
 
 Once these components have been installed, you should be able to build the `scenic_driver_local` driver.
 
-### Installing on Ubuntu 18.04
+### Installing on Ubuntu
 
 The easiest way to install on Ubuntu is to use apt-get. Just run the following:
 
 ```bash
 apt-get update
-apt-get install pkgconf libglfw3 libglfw3-dev libglew2.0 libglew-dev
-```
-
-Once these components have been installed, you should be able to build the `scenic_driver_local` driver.
-
-### Installing on Ubuntu 20.04
-
-The easiest way to install on Ubuntu is to use apt-get. Just run the following:
-
-```bash
-apt-get update
-apt-get install pkgconf libglfw3 libglfw3-dev libglew2.2 libglew-dev
+apt-get install pkgconf libgtk-3-0 libgtk-3-dev libsystemd-dev libwebp-dev libzstd-dev
 ```
 
 Once these components have been installed, you should be able to build the `scenic_driver_local` driver.
@@ -106,12 +89,12 @@ The easiest way to install on Arch Linux is to use pacman. Just run the followin
 
 ```bash
 pacman -Syu
-sudo pacman -S glfw-x11 glew
+sudo pacman -S cairo gtk3
 ```
 
-If you're using Wayland, you'll probably need `glfw-wayland` instead of `glfw-x11` and `glew-wayland` instead of `glew`
-
 ### Installing on Windows
+
+**This section needs help updating for cairo support**
 
 First, make sure to have installed Visual Studio with its "Desktop development with C++" package.
 
@@ -128,6 +111,9 @@ Lastly, install the GLEW package. Find the packaged `include` folder and extract
 
 Once these components have been installed, you should be able to build the `scenic_driver_local` driver.
 
+### Installing on Nerves
+
+See the "Targets" section above
 
 ## Documentation
 
