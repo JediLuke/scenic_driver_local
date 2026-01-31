@@ -316,7 +316,7 @@ defmodule Scenic.Driver.Local do
   defdelegate clear_color(color, driver), to: Callbacks
 
   @doc false
-  defdelegate screenshot(path, driver), to: Calbacks
+  defdelegate screenshot(path, driver), to: Callbacks
 
   # --------------------------------------------------------
 
@@ -415,7 +415,7 @@ defmodule Scenic.Driver.Local do
   end
 
   def handle_info({:_screenshot_, path}, driver) do
-    {:ok, driver} = Calbacks.screenshot(path, driver)
+    {:ok, driver} = Callbacks.screenshot(path, driver)
     {:noreply, driver}
   end
 
