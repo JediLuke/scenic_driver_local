@@ -179,6 +179,13 @@ defmodule Scenic.Driver.Local do
     Process.send(pid, :_hide_cursor_, [])
   end
 
+  @spec screenshot(driver :: pid | Driver.t(), path :: String.t()) :: :ok
+  def screenshot(%Scenic.Driver{pid: pid}, path), do: screenshot(pid, path)
+
+  def screenshot(pid, path) when is_binary(path) do
+    Process.send(pid, {:_screenshot_, path}, [])
+  end
+
   defp put_if_set(opts, key, value)
   defp put_if_set(opts, _key, nil), do: opts
 
@@ -308,6 +315,9 @@ defmodule Scenic.Driver.Local do
   @impl Scenic.Driver
   defdelegate clear_color(color, driver), to: Callbacks
 
+  @doc false
+  defdelegate screenshot(path, driver), to: Callbacks
+
   # --------------------------------------------------------
 
   @doc false
@@ -402,6 +412,11 @@ defmodule Scenic.Driver.Local do
 
   def handle_info({:_clear_input_debounce_, source, event}, driver) do
     {:noreply, Input.clear_input_debounce(source, event, driver)}
+  end
+
+  def handle_info({:_screenshot_, path}, driver) do
+    {:ok, driver} = Callbacks.screenshot(path, driver)
+    {:noreply, driver}
   end
 
   def handle_info(_msg, driver) do
