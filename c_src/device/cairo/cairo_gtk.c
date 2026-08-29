@@ -271,6 +271,32 @@ void scenic_cmd_unlock()
   g_mutex_unlock(&g_cairo_gtk.cmd_mutex);
 }
 
+void take_screenshot(uint32_t* p_msg_length, driver_data_t* p_data)
+{
+  uint32_t path_len;
+  char* path;
+
+  // Read the file path length
+  read_bytes_down(&path_len, sizeof(uint32_t), p_msg_length);
+
+  // Allocate and read the path
+  path = malloc(path_len + 1);
+  read_bytes_down(path, path_len, p_msg_length);
+  path[path_len] = '\0';
+
+  scenic_cairo_ctx_t* p_ctx = (scenic_cairo_ctx_t*)p_data->v_ctx;
+  cairo_surface_flush(p_ctx->surface);
+  cairo_status_t status = cairo_surface_write_to_png(p_ctx->surface, path);
+
+  if (status == CAIRO_STATUS_SUCCESS) {
+    log_info("Screenshot saved successfully");
+  } else {
+    log_error("Failed to save screenshot: %s", cairo_status_to_string(status));
+  }
+
+  free(path);
+}
+
 void device_loop(driver_data_t* p_data)
 {
   g_cairo_gtk.main = g_thread_new("scenic_loop", scenic_loop, p_data);
